@@ -11,6 +11,9 @@ gem 'rails', '~> 7.0.4', '>= 7.0.4.2'
 
 # Gems
 gem 'bootsnap', require: false
+gem 'devise'
+gem 'devise-jwt'
+gem 'jbuilder'
 gem 'pg', '~> 1.1'
 gem 'pry-rails'
 gem 'puma', '~> 5.0'
