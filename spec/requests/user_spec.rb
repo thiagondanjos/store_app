@@ -15,15 +15,46 @@ RSpec.describe 'Users' do
     }
   end
 
-  describe 'GET /show' do
-    before do
-      post '/login', params: params.to_json, headers: { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' }
-    end
+  before do
+    post '/login', params: params.to_json, headers: { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' }
+  end
 
+  describe 'GET /show' do
     it 'returns http success' do
-      get "/users/#{user.id}", headers: { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' }
+      get '/user', headers: { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' }
+
+      response_user_data = JSON.parse(response.body)['user']
 
       expect(response).to have_http_status(:success)
+      expect(response_user_data['id']).to eq(user.id)
+      expect(response_user_data['name']).to eq(user.name)
+      expect(response_user_data['email']).to eq(user.email)
+    end
+  end
+
+  describe 'PATCH /update' do
+    let(:update_params) { { user: { name: 'Pedro' } } }
+
+    it 'returns http success' do
+      patch '/user', params: update_params.to_json, headers: { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' }
+
+      response_user_data = JSON.parse(response.body)['user']
+
+      expect(response).to have_http_status(:success)
+      expect(response_user_data['id']).to eq(user.id)
+      expect(response_user_data['name']).to eq('Pedro')
+      expect(response_user_data['email']).to eq(user.email)
+    end
+  end
+
+  describe 'Delete /destroy' do
+    it 'returns http success' do
+      delete '/user', headers: { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' }
+
+      response_body = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response).to have_http_status(:success)
+      expect(response_body[:message]).to eq('Registration deleted successfully')
     end
   end
 end

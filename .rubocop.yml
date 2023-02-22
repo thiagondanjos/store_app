@@ -5,6 +5,9 @@ require:
 AllCops:
   Exclude:
     - 'db/schema.rb'
+    - 'spec/rails_helper.rb'
+    - 'spec/spec_helper.rb'
+    - 'db/**/*'
   NewCops: enable
 
 Layout/LineLength:
@@ -27,6 +30,10 @@ Rails/EnvironmentVariableAccess:
 
 Rails/FilePath:
   Enabled: false
+
+Rails/LexicallyScopedActionFilter:
+  Exclude:
+    - 'app/controllers/users/registrations_controller.rb'
 
 Rails/Present:
   Exclude:
@@ -93,6 +100,12 @@ Metrics/CyclomaticComplexity:
   Enabled: false
 
 Metrics/MethodLength:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/MultipleExpectations:
   Enabled: false
 
 Metrics/ParameterLists:
