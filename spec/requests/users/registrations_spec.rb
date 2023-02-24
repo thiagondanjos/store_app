@@ -3,26 +3,19 @@
 require 'rails_helper'
 
 describe 'user registrations' do
-  let(:params) do
-    {
-      user: {
-        name: 'Pedro Oliveira',
-        email: 'pedro_oliveira@2registrocivil.com.br',
-        password: 'H1LPrxEDsZ'
-      }
-    }
-  end
+  let(:headers) { { 'HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json' } }
+  let(:invalid_params) { { user: { password: 'H1LPrxEDsZ' } } }
+  let(:params) { { user: { name: Faker::Name.name, email: Faker::Internet.email, password: 'H1LPrxEDsZ' } } }
 
   context 'signup' do
     it 'successfull' do
-      post '/signup', params: params.to_json, headers: { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' }
+      post '/signup', params: params.to_json, headers: headers
 
       expect(response).to have_http_status :ok
     end
 
     it 'not successfull' do
-      post '/signup', params: { user: { password: 'H1LPrxEDsZ' } }.to_json,
-                      headers: { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' }
+      post '/signup', params: invalid_params.to_json, headers: headers
 
       expect(response).to have_http_status :unprocessable_entity
     end
