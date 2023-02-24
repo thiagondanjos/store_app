@@ -1,24 +1,46 @@
-# README
+# Installation
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+### 1. Install ruby version manager (one of these list)
 
-Things you may want to cover:
+* [rvm](https://rvm.io)
+* [rbenv](https://github.com/rbenv/rbenv)
+* [asdf](https://asdf-vm.com)
 
-* Ruby version
+### 2. Install [Postgres](https://www.postgresql.org)
 
-* System dependencies
+### 3. Export Postgres environment URL in file `.env.local`
 
-* Configuration
+```
+POSTGRES_HOST="127.0.0.1"
+POSTGRES_DATABASE="store_app_development"
+POSTGRES_USERNAME="postgres"
+POSTGRES_PASSWORD="postgres"
+```
 
-* Database creation
 
-* Database initialization
+### 4. Create Postgres Database
 
-* How to run the test suite
+```
+bin/rails db:create
+```
 
-* Services (job queues, cache servers, search engines, etc.)
 
-* Deployment instructions
+### 3. Migrate Postgres Database
 
-* ...
+```
+bin/rails db:migrate
+```
+
+### 5. Install BackEnd Dependencies
+
+```
+bundle install
+```
+
+___
+
+# Run
+
+```
+bundle exec rails s
+```
