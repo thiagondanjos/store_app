@@ -1,7 +1,3 @@
 # frozen_string_literal: true
 
-json.user do
-  json.id       user.id
-  json.email    user.email
-  json.name     user.name
-end
+json.extract! user, :id, :name, :email, :created_at, :updated_at

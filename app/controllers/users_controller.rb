@@ -2,25 +2,39 @@
 
 class UsersController < ApplicationController
   before_action :authenticate_user!
+  before_action :set_user, only: %i[show update destroy]
+
+  def index
+    @users = User.all
+  end
 
   def show
-    @user = current_user
+    render json: @user
   end
 
   def update
-    @user = current_user
-    @user.update(user_params)
-    respond_with(@user)
+    if @user.update(user_params)
+      render :show, status: :ok, location: @user
+    else
+      render json: @user.errors, status: :unprocessable_entity
+    end
   end
 
   def destroy
-    @user = current_user
-    @user.destroy
-
-    render json: { message: 'Registration deleted successfully' }, status: :ok
+    if @user.destroy
+      render json: { message: 'Registration deleted successfully' }, status: :ok
+    else
+      render json: @user.errors, status: :unprocessable_entity
+    end
   end
 
   private
+
+  def set_user
+    @user = User.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { message: 'User not found' }, status: :not_found
+  end
 
   def user_params
     params.require(:user).permit(:email, :name, :password)

@@ -11,7 +11,6 @@ Rails.application.routes.draw do
                        registrations: 'users/registrations'
                      }
 
-  get 'user', action: :show, controller: 'users'
-  patch 'user', action: :update, controller: 'users'
-  delete 'user', action: :destroy, controller: 'users'
+  resources :products
+  resources :users, except: [:create]
 end
