@@ -12,5 +12,6 @@ Rails.application.routes.draw do
                      }
 
   resources :products
+  resources :sales
   resources :users, except: [:create]
 end

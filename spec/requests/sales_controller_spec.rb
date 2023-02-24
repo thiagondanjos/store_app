@@ -2,17 +2,18 @@
 
 require 'rails_helper'
 
-RSpec.describe ProductsController do
+RSpec.describe SalesController do
   let(:headers) { { 'HTTP_ACCEPT' => 'application/json', 'CONTENT_TYPE' => 'application/json' } }
   let(:login_params) { { user: { email: user.email, password: user.password } } }
-  let!(:product) { Product.create(name: 'product', stock: 10, value: 15.90) }
-  let(:product_params) { { product: { name: 'other_product', stock: 20, value: 30 } } }
+  let(:product) { Product.create(name: 'product', stock: 10, value: 15) }
+  let!(:sale) { Sale.create(amount: 1, value: 15, product_id: product.id, user_id: user.id) }
+  let(:sale_params) { { sale: { amount: 2, value: 30, product_id: product.id, user_id: user.id } } }
   let(:user) { User.create(email: Faker::Internet.email, name: Faker::Name.name, password: 'Lj8CqXSy') }
 
   describe 'GET /index' do
     context 'with invalid login' do
       it 'unauthorized' do
-        get '/products', headers: headers
+        get '/sales', headers: headers
 
         expect(response).to have_http_status(:unauthorized)
       end
@@ -22,7 +23,7 @@ RSpec.describe ProductsController do
       before { post '/login', params: login_params.to_json, headers: headers }
 
       it 'successfull' do
-        get '/products', headers: headers
+        get '/sales', headers: headers
 
         response_user_data = JSON.parse(response.body)
 
@@ -35,7 +36,7 @@ RSpec.describe ProductsController do
   describe 'GET /show' do
     context 'with invalid login' do
       it 'unauthorized' do
-        get "/products/#{product.id}", headers: headers
+        get "/sales/#{sale.id}", headers: headers
 
         expect(response).to have_http_status(:unauthorized)
       end
@@ -45,24 +46,25 @@ RSpec.describe ProductsController do
       before { post '/login', params: login_params.to_json, headers: headers }
 
       it 'successfull' do
-        get "/products/#{product.id}", headers: headers
+        get "/sales/#{sale.id}", headers: headers
 
         response_data = JSON.parse(response.body)
 
         expect(response).to have_http_status(:success)
-        expect(response_data['id']).to eq(product.id)
-        expect(response_data['name']).to eq(product.name)
-        expect(response_data['stock']).to eq(product.stock)
-        expect(response_data['value']).to eq(product.value)
+        expect(response_data['id']).to eq(sale.id)
+        expect(response_data['amount']).to eq(sale.amount)
+        expect(response_data['value']).to eq(sale.value)
+        expect(response_data['product_id']).to eq(sale.product_id)
+        expect(response_data['user_id']).to eq(sale.user_id)
       end
 
       it 'with invalid id' do
-        get '/products/50', headers: headers
+        get '/sales/50', headers: headers
 
         response_data = JSON.parse(response.body)
 
         expect(response).to have_http_status(:not_found)
-        expect(response_data['message']).to eq('Product not found')
+        expect(response_data['message']).to eq('Sale not found')
       end
     end
   end
@@ -70,45 +72,48 @@ RSpec.describe ProductsController do
   describe 'POST /create' do
     context 'with invalid login' do
       it 'unauthorized' do
-        post '/products', params: product_params.to_json, headers: headers
+        post '/sales', params: sale_params.to_json, headers: headers
 
         expect(response).to have_http_status(:unauthorized)
       end
     end
 
     context 'with valid login' do
+      let(:other_product) { Product.create(name: 'other_product', stock: 0, value: 10) }
+      let(:incorrect_sale_params) { { sale: { amount: 2, value: 1, product_id: other_product.id, user_id: user.id } } }
+
       before { post '/login', params: login_params.to_json, headers: headers }
 
       it 'successfull' do
-        post '/products', params: product_params.to_json, headers: headers
+        post '/sales', params: sale_params.to_json, headers: headers
 
+        sale = Sale.last
         product = Product.last
 
         expect(response).to have_http_status(:success)
-        expect(product.name).to eq(product_params[:product][:name])
-        expect(product.stock).to eq(product_params[:product][:stock])
-        expect(product.value).to eq(product_params[:product][:value])
+        expect(sale.amount).to eq(sale_params[:sale][:amount])
+        expect(sale.value).to eq(sale_params[:sale][:value])
+        expect(sale.product_id).to eq(sale_params[:sale][:product_id])
+        expect(sale.user_id).to eq(sale_params[:sale][:user_id])
+        expect(product.stock).to eq(7)
       end
 
       it 'with invalid data' do
-        post '/products', params: { product: { name: '', stock: '', value: '' } }.to_json, headers: headers
+        post '/sales', params: incorrect_sale_params.to_json, headers: headers
 
         response_data = JSON.parse(response.body)
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response_data['name'][0]).to eq("can't be blank")
-        expect(response_data['stock'][0]).to eq("can't be blank")
-        expect(response_data['value'][0]).to eq("can't be blank")
+        expect(response_data['amount'][0]).to eq('insufficient product stock')
+        expect(response_data['value'][0]).to eq('value does not match product price')
       end
     end
   end
 
   describe 'PATCH /update' do
-    let(:update_params) { { product: { stock: 100, value: 85.50 } } }
-
     context 'with invalid login' do
       it 'unauthorized' do
-        patch "/products/#{product.id}", params: update_params.to_json, headers: headers
+        patch "/sales/#{sale.id}", params: sale_params.to_json, headers: headers
 
         expect(response).to have_http_status(:unauthorized)
       end
@@ -118,32 +123,32 @@ RSpec.describe ProductsController do
       before { post '/login', params: login_params.to_json, headers: headers }
 
       it 'successfull' do
-        patch "/products/#{product.id}", params: update_params.to_json, headers: headers
+        patch "/sales/#{sale.id}", params: sale_params.to_json, headers: headers
 
-        product = Product.last
+        sale = Sale.last
 
         expect(response).to have_http_status(:success)
-        expect(product.stock).to eq(update_params[:product][:stock])
-        expect(product.value).to eq(update_params[:product][:value])
+        expect(sale.amount).to eq(sale_params[:sale][:amount])
+        expect(sale.value).to eq(sale_params[:sale][:value])
+        expect(sale.product_id).to eq(sale_params[:sale][:product_id])
+        expect(sale.user_id).to eq(sale_params[:sale][:user_id])
       end
 
       it 'with invalid id' do
-        patch '/products/50', params: update_params.to_json, headers: headers
+        patch '/sales/50', params: sale_params.to_json, headers: headers
 
         response_data = JSON.parse(response.body)
 
         expect(response).to have_http_status(:not_found)
-        expect(response_data['message']).to eq('Product not found')
+        expect(response_data['message']).to eq('Sale not found')
       end
     end
   end
 
   describe 'Delete /destroy' do
-    let(:other_product) { Product.create(name: 'other_product', stock: 87, value: 55.40) }
-
     context 'with invalid login' do
       it 'unauthorized' do
-        delete "/products/#{other_product.id}", headers: headers
+        delete "/sales/#{sale.id}", headers: headers
 
         expect(response).to have_http_status(:unauthorized)
       end
@@ -153,7 +158,7 @@ RSpec.describe ProductsController do
       before { post '/login', params: login_params.to_json, headers: headers }
 
       it 'successfull' do
-        delete "/products/#{other_product.id}", headers: headers
+        delete "/sales/#{sale.id}", headers: headers
 
         response_data = JSON.parse(response.body)
 
@@ -162,12 +167,12 @@ RSpec.describe ProductsController do
       end
 
       it 'with invalid id' do
-        delete '/products/50', headers: headers
+        delete '/sales/50', headers: headers
 
         response_data = JSON.parse(response.body)
 
         expect(response).to have_http_status(:not_found)
-        expect(response_data['message']).to eq('Product not found')
+        expect(response_data['message']).to eq('Sale not found')
       end
     end
   end

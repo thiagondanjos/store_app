@@ -4,4 +4,10 @@ class Product < ApplicationRecord
   validates :name, presence: true
   validates :stock, presence: true
   validates :value, presence: true
+
+  def update_stock(amount)
+    remaining_stock = stock - amount
+    updated_stock = [remaining_stock, 0].max
+    update!(stock: updated_stock)
+  end
 end
