@@ -95,7 +95,7 @@ RSpec.describe SalesController do
         expect(sale.value).to eq(sale_params[:sale][:value])
         expect(sale.product_id).to eq(sale_params[:sale][:product_id])
         expect(sale.user_id).to eq(sale_params[:sale][:user_id])
-        expect(product.stock).to eq(7)
+        expect(product.stock).to eq(8)
       end
 
       it 'with invalid data' do
@@ -126,13 +126,14 @@ RSpec.describe SalesController do
         patch "/sales/#{sale.id}", params: sale_params.to_json, headers: headers
 
         sale = Sale.last
+        product = Product.last
 
         expect(response).to have_http_status(:success)
         expect(sale.amount).to eq(sale_params[:sale][:amount])
         expect(sale.value).to eq(sale_params[:sale][:value])
         expect(sale.product_id).to eq(sale_params[:sale][:product_id])
         expect(sale.user_id).to eq(sale_params[:sale][:user_id])
-        expect(sale.product.stock).to eq(8)
+        expect(product.stock).to eq(9)
       end
 
       it 'with invalid id' do
