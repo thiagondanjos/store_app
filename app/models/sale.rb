@@ -4,8 +4,8 @@ class Sale < ApplicationRecord
   belongs_to :product, optional: false
   belongs_to :user, optional: false
 
-  validates :amount, presence: true
-  validates :value, presence: true
+  validates :amount, presence: true, numericality: { greater_than: 0 }
+  validates :value, presence: true, numericality: { greater_than: 0 }
   validates :product_id, presence: true
   validates :user_id, presence: true
 
