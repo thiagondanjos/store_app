@@ -132,6 +132,7 @@ RSpec.describe SalesController do
         expect(sale.value).to eq(sale_params[:sale][:value])
         expect(sale.product_id).to eq(sale_params[:sale][:product_id])
         expect(sale.user_id).to eq(sale_params[:sale][:user_id])
+        expect(sale.product.stock).to eq(8)
       end
 
       it 'with invalid id' do
@@ -164,6 +165,7 @@ RSpec.describe SalesController do
 
         expect(response).to have_http_status(:success)
         expect(response_data['message']).to eq('Registration deleted successfully')
+        expect(product.stock).to eq(10)
       end
 
       it 'with invalid id' do

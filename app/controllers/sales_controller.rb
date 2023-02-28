@@ -3,6 +3,7 @@
 class SalesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_sale, only: %i[show update destroy]
+  before_action :update_stock, only: %i[update destroy]
 
   def index
     @sales = Sale.all
@@ -48,5 +49,9 @@ class SalesController < ApplicationController
     @sale = Sale.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { message: 'Sale not found' }, status: :not_found
+  end
+
+  def update_stock
+    @sale.product.restore_stock(@sale.amount)
   end
 end

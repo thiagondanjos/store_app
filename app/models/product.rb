@@ -10,4 +10,9 @@ class Product < ApplicationRecord
     updated_stock = [remaining_stock, 0].max
     update!(stock: updated_stock)
   end
+
+  def restore_stock(amount)
+    updated_stock = stock + amount
+    update!(stock: updated_stock)
+  end
 end
