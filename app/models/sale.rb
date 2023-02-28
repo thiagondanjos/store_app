@@ -11,9 +11,31 @@ class Sale < ApplicationRecord
 
   validates_with SaleValidator
 
-  after_save :update_stock
+  def delete
+    transaction do
+      product.rollback_stock(amount)
+      destroy!
+    end
+  rescue ActiveRecord::ActiveRecordError
+    errors.add(:base, :invalid)
+  end
 
-  def update_stock
-    product.update_stock(amount)
+  def effect
+    transaction do
+      product.update_stock(amount)
+      save!
+    end
+  rescue ActiveRecord::RecordInvalid
+    errors.add(:base, :invalid)
+  end
+
+  def rectify(sale_params)
+    transaction do
+      product.rollback_stock(amount)
+      update!(sale_params)
+      product.update_stock(amount)
+    end
+  rescue ActiveRecord::ActiveRecordError
+    errors.add(:base, :invalid)
   end
 end

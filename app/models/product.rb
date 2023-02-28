@@ -11,7 +11,7 @@ class Product < ApplicationRecord
     update!(stock: updated_stock)
   end
 
-  def restore_stock(amount)
+  def rollback_stock(amount)
     updated_stock = stock + amount
     update!(stock: updated_stock)
   end
